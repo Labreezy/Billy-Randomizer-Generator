@@ -7,7 +7,7 @@ from .rando import CodeGenerator
 class CodeGenerationForm(FlaskForm):
     seed = IntegerField()
     gct = BooleanField("Generate GCT")
-    submit = SubmitField()
+    submit = SubmitField("Generate code")
 
 
 def create_app(test_config=None):

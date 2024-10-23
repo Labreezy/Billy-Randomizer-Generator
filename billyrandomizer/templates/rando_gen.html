@@ -9,15 +9,16 @@
             <form method="post">
                 {{ form.csrf_token }}
                 {{ render_field(form.seed) }}
-                {{ render_field(form.gct) }}
+
                 {{ render_field(form.submit) }}
             </form>
     </div>
     <div class="col-3 mr-auto">
         <button class="btn-primary" onclick="copycode()">Copy Code To Clipboard</button>
     <p>Gecko Code:</p>
-        <br />
+        <div id="code-container">
         <samp id="geckocode-out">{{ current_codestring }}</samp>
+        </div>
     </div>
     </div>
 
