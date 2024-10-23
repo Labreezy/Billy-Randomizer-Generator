@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% from 'bootstrap4/form.html' import render_form, render_field, render_form_row %}
+{% block content %}
+    <div class="row">
+        <h2>{% block title %}Billy Hatcher Level Randomizer Generator{% endblock %}</h2>
+    </div>
+    <div class="row">
+        <div class="col-3 ml-auto">
+            <form method="post">
+                {{ form.csrf_token }}
+                {{ render_field(form.seed) }}
+                {{ render_field(form.gct) }}
+                {{ render_field(form.submit) }}
+            </form>
+    </div>
+    <div class="col-3 mr-auto">
+        <button class="btn-primary" onclick="copycode()">Copy Code To Clipboard</button>
+    <p>Gecko Code:</p>
+        <br />
+        <samp id="geckocode-out">{{ current_codestring }}</samp>
+    </div>
+    </div>
+
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    function copycode(){
+        var copyText = document.getElementById("geckocode-out");
+        navigator.clipboard.writeText(copyText.textContent);
+        alert("Copied code to clipboard!");
+    }
+</script>
+{% endblock %}
