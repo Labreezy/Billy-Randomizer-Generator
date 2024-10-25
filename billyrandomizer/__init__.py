@@ -6,6 +6,7 @@ from wtforms.fields import *
 from .rando import CodeGenerator
 class CodeGenerationForm(FlaskForm):
     seed = IntegerField()
+    minigames = BooleanField("Include Minigame Levels")
     gct = BooleanField("Generate GCT")
     submit = SubmitField("Generate code")
 
@@ -45,7 +46,8 @@ def create_app(test_config=None):
             flash('Generating Code!')
             codegen = CodeGenerator()
             seed = form.seed.data
-            codegen.gen_code(seed)
+            minigames = form.minigames.data
+            codegen.gen_code(seed=seed,minigames=minigames)
             current_codestring = codegen.get_code_text()
             current_gct_bytes = codegen.get_gct_bytes()
             redirect(url_for('index'))

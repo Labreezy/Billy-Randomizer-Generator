@@ -24,13 +24,14 @@ class CodeGenerator:
     def __init__(self):
         self.WORLD_NAMES = ['blue','red','purple','orange','yellow','green','last']
         self.WORLDS_BASE = 0x802CB5B0
-
         self.WORLD_TABLE_BASES = [self.WORLDS_BASE + i * 64 for i in range(len(self.WORLD_NAMES))]
         self.MISSION_NAMES_BILLY = []
         self.MISSION_NAMES_ROLLY = [wname + "6" for wname in self.WORLD_NAMES]
         self.MISSION_NAMES_CHICK = [wname + "7" for wname in self.WORLD_NAMES]
         self.MISSION_NAMES_BANTAM = [wname + "8" for wname in self.WORLD_NAMES]
+        self.MINIGAME_MISSIONS = ["blue7","red6","purple7","orange8","yellow4","green4","last7"]
         self.SEED = 0
+        self.MISSION_OUT_TABLE = []
         self.code = None
         self.gct = GeckoCodeTable("GEZE8P", "Billy Hatcher and the Giant Egg")
         self.gct_filename = ""
@@ -41,7 +42,7 @@ class CodeGenerator:
                 else:
                     self.MISSION_NAMES_BILLY.append(f"{world}{i+1}")
     
-    def gen_code(self, seed=-1):
+    def gen_code(self, seed=-1, minigames=True):
         if seed < 0:
             self.SEED = random.randint(1,65535)
         else:
@@ -52,13 +53,20 @@ class CodeGenerator:
         random.shuffle(self.MISSION_NAMES_ROLLY)
         random.shuffle(self.MISSION_NAMES_CHICK)
         random.shuffle(self.MISSION_NAMES_BANTAM)
-        MISSION_OUT_TABLE = []
+        self.MISSION_OUT_TABLE = []
         for i in range(len(self.WORLD_NAMES)):
-            MISSION_OUT_TABLE +=self.MISSION_NAMES_BILLY[i * 5:(i + 1) * 5]
-            MISSION_OUT_TABLE.append(self.MISSION_NAMES_ROLLY[i])
-            MISSION_OUT_TABLE.append(self.MISSION_NAMES_CHICK[i])
-            MISSION_OUT_TABLE.append(self.MISSION_NAMES_BANTAM[i])
-        MISSION_OUT_TABLE_BYTES = b"".join(list(map(mission_name_to_bytestring, MISSION_OUT_TABLE)))
+            self.MISSION_OUT_TABLE += self.MISSION_NAMES_BILLY[i * 5:(i + 1) * 5]
+            self.MISSION_OUT_TABLE.append(self.MISSION_NAMES_ROLLY[i])
+            self.MISSION_OUT_TABLE.append(self.MISSION_NAMES_CHICK[i])
+            self.MISSION_OUT_TABLE.append(self.MISSION_NAMES_BANTAM[i])
+        if not minigames:
+            postgame_level_indexes = [i for i in range(49,56)]
+            lst = [7,6,7,8,4,4,7]
+            minigame_level_indexes = [self.MISSION_OUT_TABLE.index(minigamelevel) for minigamelevel in self.MINIGAME_MISSIONS]
+            for pgi,mgi in zip(postgame_level_indexes, minigame_level_indexes):
+                self.MISSION_OUT_TABLE[pgi], self.MISSION_OUT_TABLE[mgi] = self.MISSION_OUT_TABLE[mgi], self.MISSION_OUT_TABLE[pgi]
+        print(self.MISSION_OUT_TABLE[-7:])
+        MISSION_OUT_TABLE_BYTES = b"".join(list(map(mission_name_to_bytestring, self.MISSION_OUT_TABLE)))
         self.code = WriteString(MISSION_OUT_TABLE_BYTES, self.WORLDS_BASE)
         self.code = GeckoCode(f"Billy Rando Seed {self.SEED}", "Labrys","Rando v0.0.2", self.code)
 
@@ -74,3 +82,7 @@ class CodeGenerator:
             return self.gct.as_bytes()
         else:
             return b""
+
+if __name__ == '__main__':
+    cg = CodeGenerator()
+    cg.gen_code(seed=2,minigames=False)
